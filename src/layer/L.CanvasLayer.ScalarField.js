@@ -8,7 +8,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         type: 'colormap', // [colormap|vector]
         color: null, // function colorFor(value) [e.g. chromajs.scale],
         interpolate: false, // Change to use interpolation
-        vectorSize: 20, // only used if 'vector'
+        vectorSize: null, // only used if 'vector'
         arrowDirection: 'from' // [from|towards]
     },
 
@@ -36,9 +36,9 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         this._updateOpacity();
 
         let r = this._getRendererMethod();
-        //console.time('onDrawLayer');
+        // console.time('onDrawLayer');
         r();
-        //console.timeEnd('onDrawLayer');
+        // console.timeEnd('onDrawLayer');
     },
     /* eslint-enable no-unused-vars */
 
@@ -61,12 +61,14 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
 
     _showCanvas() {
         L.CanvasLayer.Field.prototype._showCanvas.call(this);
-        this.needRedraw(); // TODO check spurious redraw (e.g. hide/show without moving map)
+        this.needRedraw(); // TODO check spurious redraw (e.g. hide/show
+                            // without moving map)
     },
 
     /**
-     * Draws the field in an ImageData and applying it with putImageData.
-     * Used as a reference: http://geoexamples.com/d3-raster-tools-docs/code_samples/raster-pixels-page.html
+     * Draws the field in an ImageData and applying it with putImageData. Used
+     * as a reference:
+     * http://geoexamples.com/d3-raster-tools-docs/code_samples/raster-pixels-page.html
      */
     _drawImage: function() {
         this._ensureColor();
@@ -83,12 +85,16 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     },
 
     /**
-     * Prepares the image in data, as array with RGBAs
-     * [R1, G1, B1, A1, R2, G2, B2, A2...]
+     * Prepares the image in data, as array with RGBAs [R1, G1, B1, A1, R2, G2,
+     * B2, A2...]
+     * 
      * @private
-     * @param {[[Type]]} data   [[Description]]
-     * @param {Numver} width
-     * @param {Number} height
+     * @param {[[Type]]}
+     *                data [[Description]]
+     * @param {Numver}
+     *                width
+     * @param {Number}
+     *                height
      */
     _prepareImageIn(data, width, height) {
         let f = this.options.interpolate ? 'interpolatedValueAt' : 'valueAt';
@@ -100,14 +106,18 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
                 let lon = pointCoords.lng;
                 let lat = pointCoords.lat;
 
-                let v = this._field[f](lon, lat); // 'valueAt' | 'interpolatedValueAt' || TODO check some 'artifacts'
+                let v = this._field[f](lon, lat); // 'valueAt' |
+                                                    // 'interpolatedValueAt' ||
+                                                    // TODO check some
+                                                    // 'artifacts'
                 if (v !== null) {
                     let color = this._getColorFor(v);
                     let [R, G, B, A] = color.rgba();
                     data[pos] = R;
                     data[pos + 1] = G;
                     data[pos + 2] = B;
-                    data[pos + 3] = parseInt(A * 255); // not percent in alpha but hex 0-255
+                    data[pos + 3] = parseInt(A * 255); // not percent in alpha
+                                                        // but hex 0-255
                 }
                 pos = pos + 4;
             }
@@ -122,8 +132,8 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         const pixelSize = (bounds.max.x - bounds.min.x) / this._field.nCols;
 
         var stride = Math.max(
-            1,
-            Math.floor(1.2 * this.options.vectorSize / pixelSize)
+            3,
+            Math.floor(20 / pixelSize)
         );
 
         const ctx = this._getDrawingContext();
@@ -134,16 +144,18 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         for (var y = 0; y < this._field.height; y = y + stride) {
             for (var x = 0; x < this._field.width; x = x + stride) {
                 let [lon, lat] = this._field._lonLatAtIndexes(x, y);
-                let v = this._field.valueAt(lon, lat);
+                let direction = this._field.valueAt(lon, lat);
+                let magnitude = this.options.vectorSize ? this.options.vectorSize.valueAt(lon, lat) : null;
+                
                 let center = L.latLng(lat, lon);
-                if (v !== null && currentBounds.contains(center)) {
+                if (direction !== null && currentBounds.contains(center)) {
                     let cell = new Cell(
                         center,
-                        v,
+                        direction,
                         this.cellXSize,
                         this.cellYSize
                     );
-                    this._drawArrow(cell, ctx);
+                    this._drawArrow(cell, ctx, magnitude);
                 }
             }
         }
@@ -161,33 +173,45 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         return pixelBounds;
     },
 
-    _drawArrow: function(cell, ctx) {
-        var projected = this._map.latLngToContainerPoint(cell.center);
-
+    _drawArrow: function(cell, ctx, magnitude) {
         // colormap vs. simple color
         let color = this.options.color;
         if (typeof color === 'function') {
             ctx.strokeStyle = color(cell.value);
         }
 
-        const size = this.options.vectorSize;
+        // get current magnitude
+        const size = magnitude ? magnitude * 50 : 20;
+        
+        // save canvas state
         ctx.save();
 
+        var projected = this._map.latLngToContainerPoint(cell.center);
         ctx.translate(projected.x, projected.y);
 
-        let rotationRads = (90 + cell.value) * Math.PI / 180; // from, by default
+        // calculate and apply rotation
+        let rotationRads = (90 + cell.value) * Math.PI / 180;
         if (this.options.arrowDirection === 'towards') {
             rotationRads = rotationRads + Math.PI;
         }
         ctx.rotate(rotationRads);
 
+        // begin creating arrow
         ctx.beginPath();
+        
+        // draw arrow shaft
         ctx.moveTo(-size / 2, 0);
         ctx.lineTo(+size / 2, 0);
+        
+        // draw arrow point, somehow
         ctx.moveTo(size * 0.25, -size * 0.25);
         ctx.lineTo(+size / 2, 0);
         ctx.lineTo(size * 0.25, size * 0.25);
+        
+        // draw arrow
         ctx.stroke();
+        
+        // go back to saved state (reset for next arrow)
         ctx.restore();
     },
 
@@ -199,7 +223,8 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         if (typeof c === 'function') {
             c = this.options.color(v);
         }
-        let color = chroma(c); // to be more flexible, a chroma color object is always created || TODO improve efficiency
+        let color = chroma(c); // to be more flexible, a chroma color object is
+                                // always created || TODO improve efficiency
         return color;
     }
 });
