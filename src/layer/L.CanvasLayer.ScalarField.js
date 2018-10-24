@@ -132,7 +132,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         const pixelSize = (bounds.max.x - bounds.min.x) / this._field.nCols;
 
         var stride = Math.max(
-            3,
+            1,
             Math.floor(20 / pixelSize)
         );
 
