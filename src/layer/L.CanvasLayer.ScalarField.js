@@ -14,9 +14,9 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
 
     initialize: function(scalarField, options) {
         L.CanvasLayer.Field.prototype.initialize.call(
-            this,
-            scalarField,
-            options
+                this,
+                scalarField,
+                options
         );
         L.Util.setOptions(this, options);
     },
@@ -62,7 +62,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     _showCanvas() {
         L.CanvasLayer.Field.prototype._showCanvas.call(this);
         this.needRedraw(); // TODO check spurious redraw (e.g. hide/show
-                            // without moving map)
+        // without moving map)
     },
 
     /**
@@ -107,9 +107,9 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
                 let lat = pointCoords.lat;
 
                 let v = this._field[f](lon, lat); // 'valueAt' |
-                                                    // 'interpolatedValueAt' ||
-                                                    // TODO check some
-                                                    // 'artifacts'
+                // 'interpolatedValueAt' ||
+                // TODO check some
+                // 'artifacts'
                 if (v !== null) {
                     let color = this._getColorFor(v);
                     let [R, G, B, A] = color.rgba();
@@ -117,7 +117,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
                     data[pos + 1] = G;
                     data[pos + 2] = B;
                     data[pos + 3] = parseInt(A * 255); // not percent in alpha
-                                                        // but hex 0-255
+                    // but hex 0-255
                 }
                 pos = pos + 4;
             }
@@ -132,8 +132,8 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         const pixelSize = (bounds.max.x - bounds.min.x) / this._field.nCols;
 
         var stride = Math.max(
-            1,
-            Math.floor(20 / pixelSize)
+                1,
+                Math.floor(20 / pixelSize)
         );
 
         const ctx = this._getDrawingContext();
@@ -146,28 +146,46 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
                 let [lon, lat] = this._field._lonLatAtIndexes(x, y);
                 let direction = this._field.valueAt(lon, lat);
                 let magnitude = this.options.vectorSize ? this.options.vectorSize.valueAt(lon, lat) : null;
-                
+
                 let center = L.latLng(lat, lon);
                 if (direction !== null && currentBounds.contains(center)) {
                     let cell = new Cell(
-                        center,
-                        direction,
-                        this.cellXSize,
-                        this.cellYSize
+                            center,
+                            direction,
+                            this.cellXSize,
+                            this.cellYSize
                     );
                     this._drawArrow(cell, ctx, magnitude);
                 }
             }
+        }
+
+        /* draw legend scale */
+        /* TODO add color and draw white background and stuff */
+        let mapRange = {'lat': currentBounds.getEast() - currentBounds.getWest(), 'lng': currentBounds.getNorth() - currentBounds.getSouth()};
+
+        let legendOrigin = currentBounds.getSouthWest();
+        legendOrigin['lat'] = legendOrigin['lat'] + (mapRange['lat'] * 0.03);
+        legendOrigin['lng'] = legendOrigin['lng'] + (mapRange['lng'] * 0.04);
+
+        for (let direction in {0: null, 270: null}) {
+            let cell = new Cell(
+                    legendOrigin,
+                    direction,
+                    this.cellXSize,
+                    this.cellYSize
+            );
+            this._drawArrow(cell, ctx, 1);
         }
     },
 
     _pixelBounds: function() {
         const bounds = this.getBounds();
         const northWest = this._map.latLngToContainerPoint(
-            bounds.getNorthWest()
+                bounds.getNorthWest()
         );
         const southEast = this._map.latLngToContainerPoint(
-            bounds.getSouthEast()
+                bounds.getSouthEast()
         );
         var pixelBounds = L.bounds(northWest, southEast);
         return pixelBounds;
@@ -181,8 +199,8 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         }
 
         // get current magnitude
-        const size = magnitude ? magnitude * 50 : 20;
-        
+        const size = magnitude != null ? magnitude * 50 : 20;
+
         // save canvas state
         ctx.save();
 
@@ -198,19 +216,19 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
 
         // begin creating arrow
         ctx.beginPath();
-        
+
         // draw arrow shaft
         ctx.moveTo(-size / 2, 0);
         ctx.lineTo(+size / 2, 0);
-        
+
         // draw arrow point, somehow
         ctx.moveTo(size * 0.25, -size * 0.25);
         ctx.lineTo(+size / 2, 0);
         ctx.lineTo(size * 0.25, size * 0.25);
-        
+
         // draw arrow
         ctx.stroke();
-        
+
         // go back to saved state (reset for next arrow)
         ctx.restore();
     },
@@ -224,7 +242,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
             c = this.options.color(v);
         }
         let color = chroma(c); // to be more flexible, a chroma color object is
-                                // always created || TODO improve efficiency
+        // always created || TODO improve efficiency
         return color;
     }
 });
