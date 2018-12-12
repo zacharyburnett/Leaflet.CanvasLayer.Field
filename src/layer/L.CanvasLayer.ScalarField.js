@@ -141,33 +141,26 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
 
         var currentBounds = this._map.getBounds();
 
-        for (var y = 0; y < this._field.height; y = y + stride) {
-            for (var x = 0; x < this._field.width; x = x + stride) {
-                let [lon, lat] = this._field._lonLatAtIndexes(x, y);
-                let direction = this._field.valueAt(lon, lat);
-                let magnitude = this.options.vectorSize ? this.options.vectorSize.valueAt(lon, lat) : null;
-
-                let center = L.latLng(lat, lon);
-                if (direction !== null && currentBounds.contains(center)) {
-                    let cell = new Cell(
-                            center,
-                            direction,
-                            this.cellXSize,
-                            this.cellYSize
-                    );
-                    this._drawArrow(cell, ctx, magnitude);
-                }
-            }
-        }
-
         /* draw legend scale */
         /* TODO add color and draw white background and stuff */
-        let mapRange = {'lat': currentBounds.getEast() - currentBounds.getWest(), 'lng': currentBounds.getNorth() - currentBounds.getSouth()};
+        let mapRange = {
+            'lat': currentBounds.getEast() - currentBounds.getWest(), 
+            'lng': currentBounds.getNorth() - currentBounds.getSouth()
+        };
 
-        let legendOrigin = currentBounds.getSouthWest();
-        legendOrigin['lat'] = legendOrigin['lat'] + (mapRange['lat'] * 0.03);
-        legendOrigin['lng'] = legendOrigin['lng'] + (mapRange['lng'] * 0.04);
-
+        /* size of scale in percetnage of map canvas */
+        let legendSize = 0.05;
+        
+        let legendOrigin = {
+            'lat': currentBounds.getSouthWest()['lat'] + (mapRange['lat'] * legendSize),
+            'lng': currentBounds.getSouthWest()['lng'] + (mapRange['lng'] * legendSize)
+        };
+        
+        let legendNorthEast = {
+            'lat': legendOrigin['lat'] + (mapRange['lat'] * legendSize),
+            'lng': legendOrigin['lng'] + (mapRange['lng'] * legendSize)
+        };
+        
         for (let direction in {0: null, 270: null}) {
             let cell = new Cell(
                     legendOrigin,
@@ -176,6 +169,30 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
                     this.cellYSize
             );
             this._drawArrow(cell, ctx, 1);
+        }
+        
+        /* draw arrows */
+        for (var y = 0; y < this._field.height; y = y + stride) {
+            for (var x = 0; x < this._field.width; x = x + stride) {
+                let [lon, lat] = this._field._lonLatAtIndexes(x, y);
+                let direction = this._field.valueAt(lon, lat);
+                let magnitude = this.options.vectorSize ? this.options.vectorSize.valueAt(lon, lat) : null;
+                
+                let center = L.latLng(lat, lon);
+                if (direction !== null) {
+                    if (currentBounds.contains(center)) {
+                        if (!(lon <= legendNorthEast['lng'] && lat <= legendNorthEast['lat'])) {
+                            let cell = new Cell(
+                                    center,
+                                    direction,
+                                    this.cellXSize,
+                                    this.cellYSize
+                            );
+                            this._drawArrow(cell, ctx, magnitude);
+                        }
+                    }
+                }
+            }
         }
     },
 
