@@ -148,17 +148,18 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
             'lng': currentBounds.getNorth() - currentBounds.getSouth()
         };
 
-        /* size of scale in percetnage of map canvas */
-        let legendSize = 0.03;
+        /* size of scale in percentage of map canvas */
+        let legendHeight = 0.025;
+        let legendWidth = 0.04;
         
         let legendOrigin = {
-            'lat': currentBounds.getSouthWest()['lat'] + (mapRange['lat'] * legendSize),
-            'lng': currentBounds.getSouthWest()['lng'] + (mapRange['lng'] * legendSize)
+            'lat': currentBounds.getSouthWest()['lat'] + (mapRange['lat'] * legendHeight),
+            'lng': currentBounds.getSouthWest()['lng'] + (mapRange['lng'] * legendWidth)
         };
         
         let legendNorthEast = {
-            'lat': legendOrigin['lat'] + (mapRange['lat'] * legendSize),
-            'lng': legendOrigin['lng'] + (mapRange['lng'] * legendSize)
+            'lat': legendOrigin['lat'] + (mapRange['lat'] * legendHeight),
+            'lng': legendOrigin['lng'] + (mapRange['lng'] * legendWidth)
         };
         
         for (let direction in {0: null, 270: null}) {
