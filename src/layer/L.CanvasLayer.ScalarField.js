@@ -149,7 +149,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         };
 
         /* size of scale in percetnage of map canvas */
-        let legendSize = 0.05;
+        let legendSize = 0.03;
         
         let legendOrigin = {
             'lat': currentBounds.getSouthWest()['lat'] + (mapRange['lat'] * legendSize),
