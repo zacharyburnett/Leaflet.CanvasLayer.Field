@@ -144,45 +144,64 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         /* draw legend scale */
         /* TODO add color and draw white background and stuff */
         let mapRange = {
-            'lat': currentBounds.getEast() - currentBounds.getWest(), 
-            'lng': currentBounds.getNorth() - currentBounds.getSouth()
+            'lat': currentBounds.getNorth() - currentBounds.getSouth(), 
+            'lng': currentBounds.getEast() - currentBounds.getWest()
         };
-
+        
         /* size of scale in percentage of map canvas */
-        let legendHeight = 0.025;
-        let legendWidth = 0.04;
+        let legendSize = (mapRange['lat'] + mapRange['lng']) / 2 * 0.04;
+        let bufferSize = (mapRange['lat'] + mapRange['lng']) / 2 * 0.014;
         
         let legendOrigin = {
-            'lat': currentBounds.getSouthWest()['lat'] + (mapRange['lat'] * legendHeight),
-            'lng': currentBounds.getSouthWest()['lng'] + (mapRange['lng'] * legendWidth)
+            'lat': currentBounds.getSouthWest()['lat'],
+            'lng': currentBounds.getSouthWest()['lng']
         };
-        
-        let legendNorthEast = {
-            'lat': legendOrigin['lat'] + (mapRange['lat'] * legendHeight),
-            'lng': legendOrigin['lng'] + (mapRange['lng'] * legendWidth)
+
+        let legendArrowCenters = {
+            'horizontal': {
+                'lat': legendOrigin['lat'] + bufferSize,
+                'lng': legendOrigin['lng'] + legendSize
+            },
+            'vertical': {
+                'lat': legendOrigin['lat'] + legendSize,
+                'lng': legendOrigin['lng'] + bufferSize
+            }
         };
-        
-        for (let direction in {0: null, 270: null}) {
+
+        let legendBoxNorthEast = {
+            'lat': legendOrigin['lat'] + legendSize + bufferSize * 3,
+            'lng': legendOrigin['lng'] + legendSize + bufferSize * 3
+        };
+
+        for (let direction in legendArrowCenters) {
+            let angle;
+
+            if (direction == 'horizontal') {
+                angle = 270;
+            } else if (direction == 'vertical') {
+                angle = 180;
+            }
+
             let cell = new Cell(
-                    legendOrigin,
-                    direction,
+                    legendArrowCenters[direction],
+                    angle,
                     this.cellXSize,
                     this.cellYSize
             );
             this._drawArrow(cell, ctx, 1);
         }
-        
+
         /* draw arrows */
         for (var y = 0; y < this._field.height; y = y + stride) {
             for (var x = 0; x < this._field.width; x = x + stride) {
                 let [lon, lat] = this._field._lonLatAtIndexes(x, y);
                 let direction = this._field.valueAt(lon, lat);
                 let magnitude = this.options.vectorSize ? this.options.vectorSize.valueAt(lon, lat) : null;
-                
+
                 let center = L.latLng(lat, lon);
                 if (direction !== null) {
                     if (currentBounds.contains(center)) {
-                        if (!(lon <= legendNorthEast['lng'] && lat <= legendNorthEast['lat'])) {
+                        if (!(lon <= legendBoxNorthEast['lng'] && lat <= legendBoxNorthEast['lat'])) {
                             let cell = new Cell(
                                     center,
                                     direction,
