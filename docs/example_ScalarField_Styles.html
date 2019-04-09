@@ -111,7 +111,7 @@
             var updateGradient = function () {
                 var scale = chroma.scale([low.value, high.value]).domain(s.range);
                 layer1.setColor(scale);
-            }
+            };
             low.addEventListener('input', updateGradient);
             high.addEventListener('input', updateGradient);
 
