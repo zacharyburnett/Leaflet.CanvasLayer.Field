@@ -8,27 +8,27 @@ L.CanvasLayer.SimpleLonLat = L.CanvasLayer.extend({
         color: 'gray'
     },
 
-    initialize: function(points, options) {
+    initialize: function (points, options) {
         this.points = points;
         L.Util.setOptions(this, options);
     },
 
-    onLayerDidMount: function() {
+    onLayerDidMount: function () {
         // -- prepare custom drawing
     },
 
-    onLayerWillUnmount: function() {
+    onLayerWillUnmount: function () {
         // -- custom cleanup
     },
 
     /* eslint-disable no-unused-vars */
-    setData: function(data) {
+    setData: function (data) {
         // -- custom data set
         this.needRedraw(); // -- call to drawLayer
     },
     /* eslint-enable no-unused-vars */
 
-    onDrawLayer: function(viewInfo) {
+    onDrawLayer: function (viewInfo) {
         // canvas preparation
         let g = viewInfo.canvas.getContext('2d');
         g.clearRect(0, 0, viewInfo.canvas.width, viewInfo.canvas.height);
@@ -45,7 +45,7 @@ L.CanvasLayer.SimpleLonLat = L.CanvasLayer.extend({
         }
     },
 
-    getBounds: function() {
+    getBounds: function () {
         // TODO: bounding with points...
         let xs = this.points.map(pt => pt.lng);
         let ys = this.points.map(pt => pt.lat);
@@ -62,6 +62,6 @@ L.CanvasLayer.SimpleLonLat = L.CanvasLayer.extend({
     }
 });
 
-L.canvasLayer.simpleLonLat = function(lonslats, options) {
+L.canvasLayer.simpleLonLat = function (lonslats, options) {
     return new L.CanvasLayer.SimpleLonLat(lonslats, options);
 };

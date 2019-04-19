@@ -5,5 +5,5 @@
 //
 
 module.exports = process.env.CI === 'true'
-  ? require( './karma-ci.conf.js' )
-  : require( './karma-local.conf.js' );
+    ? require('./karma-ci.conf.js')
+    : require('./karma-local.conf.js');

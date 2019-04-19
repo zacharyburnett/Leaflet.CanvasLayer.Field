@@ -12,16 +12,16 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         arrowDirection: 'from' // [from|towards]
     },
 
-    initialize: function(scalarField, options) {
+    initialize: function (scalarField, options) {
         L.CanvasLayer.Field.prototype.initialize.call(
-                this,
-                scalarField,
-                options
+            this,
+            scalarField,
+            options
         );
         L.Util.setOptions(this, options);
     },
 
-    _defaultColorScale: function() {
+    _defaultColorScale: function () {
         return chroma.scale(['white', 'black']).domain(this._field.range);
     },
 
@@ -31,7 +31,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     },
 
     /* eslint-disable no-unused-vars */
-    onDrawLayer: function(viewInfo) {
+    onDrawLayer: function (viewInfo) {
         if (!this.isVisible()) return;
         this._updateOpacity();
 
@@ -42,7 +42,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     },
     /* eslint-enable no-unused-vars */
 
-    _getRendererMethod: function() {
+    _getRendererMethod: function () {
         switch (this.options.type) {
             case 'colormap':
                 return this._drawImage.bind(this);
@@ -53,7 +53,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         }
     },
 
-    _ensureColor: function() {
+    _ensureColor: function () {
         if (this.options.color === null) {
             this.setColor(this._defaultColorScale());
         }
@@ -70,7 +70,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
      * as a reference:
      * http://geoexamples.com/d3-raster-tools-docs/code_samples/raster-pixels-page.html
      */
-    _drawImage: function() {
+    _drawImage: function () {
         this._ensureColor();
 
         let ctx = this._getDrawingContext();
@@ -87,7 +87,7 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     /**
      * Prepares the image in data, as array with RGBAs [R1, G1, B1, A1, R2, G2,
      * B2, A2...]
-     * 
+     *
      * @private
      * @param {[[Type]]}
      *                data [[Description]]
@@ -127,13 +127,13 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     /**
      * Draws the field as a set of arrows. Direction from 0 to 360 is assumed.
      */
-    _drawArrows: function() {
+    _drawArrows: function () {
         const bounds = this._pixelBounds();
         const pixelSize = (bounds.max.x - bounds.min.x) / this._field.nCols;
 
         var stride = Math.max(
-                1,
-                Math.floor(20 / pixelSize)
+            1,
+            Math.floor(20 / pixelSize)
         );
 
         const ctx = this._getDrawingContext();
@@ -144,14 +144,14 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         /* draw legend scale */
         /* TODO add color and draw white background and stuff */
         let mapRange = {
-            'lat': currentBounds.getNorth() - currentBounds.getSouth(), 
+            'lat': currentBounds.getNorth() - currentBounds.getSouth(),
             'lng': currentBounds.getEast() - currentBounds.getWest()
         };
-        
+
         /* size of scale in percentage of map canvas */
         let legendSize = (mapRange['lat'] + mapRange['lng']) / 2 * 0.04;
         let bufferSize = (mapRange['lat'] + mapRange['lng']) / 2 * 0.014;
-        
+
         let legendOrigin = {
             'lat': currentBounds.getSouthWest()['lat'],
             'lng': currentBounds.getSouthWest()['lng']
@@ -183,10 +183,10 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
             }
 
             let cell = new Cell(
-                    legendArrowCenters[direction],
-                    angle,
-                    this.cellXSize,
-                    this.cellYSize
+                legendArrowCenters[direction],
+                angle,
+                this.cellXSize,
+                this.cellYSize
             );
             this._drawArrow(cell, ctx, 1);
         }
@@ -203,10 +203,10 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
                     if (currentBounds.contains(center)) {
                         if (!(lon <= legendBoxNorthEast['lng'] && lat <= legendBoxNorthEast['lat'])) {
                             let cell = new Cell(
-                                    center,
-                                    direction,
-                                    this.cellXSize,
-                                    this.cellYSize
+                                center,
+                                direction,
+                                this.cellXSize,
+                                this.cellYSize
                             );
                             this._drawArrow(cell, ctx, magnitude);
                         }
@@ -216,19 +216,19 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
         }
     },
 
-    _pixelBounds: function() {
+    _pixelBounds: function () {
         const bounds = this.getBounds();
         const northWest = this._map.latLngToContainerPoint(
-                bounds.getNorthWest()
+            bounds.getNorthWest()
         );
         const southEast = this._map.latLngToContainerPoint(
-                bounds.getSouthEast()
+            bounds.getSouthEast()
         );
         var pixelBounds = L.bounds(northWest, southEast);
         return pixelBounds;
     },
 
-    _drawArrow: function(cell, ctx, magnitude) {
+    _drawArrow: function (cell, ctx, magnitude) {
         // colormap vs. simple color
         let color = this.options.color;
         if (typeof color === 'function') {
@@ -284,6 +284,6 @@ L.CanvasLayer.ScalarField = L.CanvasLayer.Field.extend({
     }
 });
 
-L.canvasLayer.scalarField = function(scalarField, options) {
+L.canvasLayer.scalarField = function (scalarField, options) {
     return new L.CanvasLayer.ScalarField(scalarField, options);
 };
