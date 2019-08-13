@@ -90,7 +90,7 @@ export default class Field {
 
     /**
      * Apply a spatial mask to field values
-     * @param {L.GeoJSON} m 
+     * @param {L.GeoJSON} m
      */
     setSpatialMask(m) {
         this._spatialMask = m;
@@ -145,8 +145,8 @@ export default class Field {
 
     /**
      * Checks if coordinates are inside the Extent (considering wrapped longitudes if needed)
-     * @param {Number} lon 
-     * @param {Number} lat 
+     * @param {Number} lon
+     * @param {Number} lat
      */
     _pointInExtent(lon, lat) {
         let [xmin, xmax] = this._getWrappedLongitudes();
@@ -157,8 +157,8 @@ export default class Field {
 
     /**
      * Check if coordinates are inside the spatialMask (Point in Polygon analysis)
-     * @param {Number} lon 
-     * @param {Number} lat 
+     * @param {Number} lon
+     * @param {Number} lat
      */
     _pointInMask(lon, lat) {
         const pt = {
@@ -188,7 +188,7 @@ export default class Field {
      * @param   {Number} longitude
      * @param   {Number} latitude
      * @returns {Vector|Number} [u, v, magnitude]
-     *                          
+     *
      * Source: https://github.com/cambecc/earth > product.js
      */
     interpolatedValueAt(lon, lat) {
@@ -272,7 +272,7 @@ export default class Field {
      * @param   {Number} ci
      * @param   {Number} fj
      * @param   {Number} cj
-     * @returns {Array} 
+     * @returns {Array}
      */
     _getFourSurroundingValues(fi, ci, fj, cj) {
         var row;
@@ -414,10 +414,12 @@ export default class Field {
      * @abstract
      * @private
      */
+
     /* eslint-disable no-unused-vars */
     _doInterpolation(x, y, g00, g10, g01, g11) {
         throw new TypeError('Must be overriden');
     }
+
     /* eslint-disable no-unused-vars */
 
     /**

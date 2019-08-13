@@ -7,6 +7,15 @@ import ScalarField from './ScalarField';
  *  (e.g. a raster representing winds for a region)
  */
 export default class VectorField extends Field {
+    constructor(params) {
+        super(params);
+
+        this.us = params['us'];
+        this.vs = params['vs'];
+        this.grid = this._buildGrid();
+        this.range = this._calculateRange();
+    }
+
     /**
      * Creates a VectorField from the content of two ASCIIGrid files
      * @param   {String} ascU - with u-component
@@ -74,15 +83,6 @@ export default class VectorField extends Field {
         return p;
     }
 
-    constructor(params) {
-        super(params);
-
-        this.us = params['us'];
-        this.vs = params['vs'];
-        this.grid = this._buildGrid();
-        this.range = this._calculateRange();
-    }
-
     /**
      * Get a derived field, from a computation on
      * the VectorField
@@ -104,7 +104,7 @@ export default class VectorField extends Field {
     }
 
     _getFunctionFor(type) {
-        return function(u, v) {
+        return function (u, v) {
             let uv = new Vector(u, v);
             return uv[type](); // magnitude, directionTo, directionFrom
         };
@@ -157,11 +157,13 @@ export default class VectorField extends Field {
         params['us'] = [];
         params['vs'] = [];
     }
+
     _pushValueToArrays(params, value) {
         //console.log(value);
         params['us'].push(value.u);
         params['vs'].push(value.v);
     }
+
     _makeNewFrom(params) {
         return new VectorField(params);
     }
@@ -175,7 +177,7 @@ export default class VectorField extends Field {
         // TODO make a clearer method for getting these vectors...
         let vectors = this.getCells()
             .map(pt => pt.value)
-            .filter(function(v) {
+            .filter(function (v) {
                 return v !== null;
             });
 

@@ -12,7 +12,7 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
         velocityScale: 1 / 5000
     },
 
-    initialize: function(vectorField, options) {
+    initialize: function (vectorField, options) {
         L.CanvasLayer.Field.prototype.initialize.call(
             this,
             vectorField,
@@ -23,12 +23,12 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
         this.timer = null;
     },
 
-    onLayerDidMount: function() {
+    onLayerDidMount: function () {
         L.CanvasLayer.Field.prototype.onLayerDidMount.call(this);
         this._map.on('move resize', this._stopAnimation, this);
     },
 
-    onLayerWillUnmount: function() {
+    onLayerWillUnmount: function () {
         L.CanvasLayer.Field.prototype.onLayerWillUnmount.call(this);
         this._map.off('move resize', this._stopAnimation, this);
         this._stopAnimation();
@@ -39,7 +39,7 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
         this._stopAnimation();
     },
 
-    onDrawLayer: function(viewInfo) {
+    onDrawLayer: function (viewInfo) {
         if (!this._field || !this.isVisible()) return;
 
         this._updateOpacity();
@@ -47,7 +47,7 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
         let ctx = this._getDrawingContext();
         let paths = this._prepareParticlePaths();
 
-        this.timer = d3.timer(function() {
+        this.timer = d3.timer(function () {
             _moveParticles();
             _drawParticles();
         }, this.options.duration);
@@ -60,7 +60,7 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
          */
         function _moveParticles() {
             // let screenFactor = 1 / self._map.getZoom(); // consider using a 'screenFactor' to ponderate velocityScale
-            paths.forEach(function(par) {
+            paths.forEach(function (par) {
                 if (par.age > self.options.maxAge) {
                     // restart, on a random x,y
                     par.age = 0;
@@ -105,7 +105,7 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
             ctx.strokeStyle = self.options.color;
 
             // New paths
-            paths.forEach(function(par) {
+            paths.forEach(function (par) {
                 self._drawParticle(viewInfo, ctx, par);
             });
         }
@@ -145,7 +145,7 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
         }
     },
 
-    _prepareParticlePaths: function() {
+    _prepareParticlePaths: function () {
         let paths = [];
 
         for (var i = 0; i < this.options.paths; i++) {
@@ -156,17 +156,17 @@ L.CanvasLayer.VectorFieldAnim = L.CanvasLayer.Field.extend({
         return paths;
     },
 
-    _randomAge: function() {
+    _randomAge: function () {
         return Math.floor(Math.random() * this.options.maxAge);
     },
 
-    _stopAnimation: function() {
+    _stopAnimation: function () {
         if (this.timer) {
             this.timer.stop();
         }
     }
 });
 
-L.canvasLayer.vectorFieldAnim = function(vectorField, options) {
+L.canvasLayer.vectorFieldAnim = function (vectorField, options) {
     return new L.CanvasLayer.VectorFieldAnim(vectorField, options);
 };

@@ -1,17 +1,18 @@
 // base
 import Vector from './Vector.js';
+import Cell from './Cell.js';
+import Field from './Field.js';
+import ScalarField from './ScalarField.js';
+import VectorField from './VectorField.js';
+
 window.L.Vector = Vector;
 
-import Cell from './Cell.js';
 window.L.Cell = Cell;
 
-import Field from './Field.js';
 window.L.Field = Field;
 
-import ScalarField from './ScalarField.js';
 window.L.ScalarField = ScalarField;
 
-import VectorField from './VectorField.js';
 window.L.VectorField = VectorField;
 
 // layer
@@ -23,7 +24,3 @@ require('./layer/L.CanvasLayer.VectorFieldAnim.js');
 
 // control
 require('./control/L.Control.ColorBar.js');
-
-/* eslint-disable no-console */
-console.log('leaflet.canvaslayer.field v1.4.1');
-/* eslint-enable no-console */

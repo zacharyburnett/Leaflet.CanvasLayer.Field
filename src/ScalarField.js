@@ -4,6 +4,15 @@ import Field from './Field';
  * Scalar Field
  */
 export default class ScalarField extends Field {
+    constructor(params) {
+        super(params);
+        this.zs = params['zs'];
+
+        this.grid = this._buildGrid();
+        this._updateRange();
+        //console.log(`ScalarField created (${this.nCols} x ${this.nRows})`);
+    }
+
     /**
      * Creates a ScalarField from the content of an ASCIIGrid file
      * @param   {String}   asc
@@ -27,9 +36,9 @@ export default class ScalarField extends Field {
             items.forEach(it => {
                 let floatItem = parseFloat(it);
                 let v =
-                    floatItem !== header.noDataValue
-                        ? floatItem * scaleFactor
-                        : null;
+                    floatItem !== header.noDataValue ?
+                        floatItem * scaleFactor :
+                        null;
                 zs.push(v);
             });
         }
@@ -51,7 +60,9 @@ export default class ScalarField extends Field {
                 var items = line.split(' ').filter(i => i != '');
                 var param = items[0].trim().toUpperCase();
                 var value = parseFloat(items[1].trim());
-                return { [param]: value };
+                return {
+                    [param]: value
+                };
             });
 
             const usesCorner = 'XLLCORNER' in headerItems[2];
@@ -60,12 +71,12 @@ export default class ScalarField extends Field {
             const header = {
                 nCols: parseInt(headerItems[0]['NCOLS']),
                 nRows: parseInt(headerItems[1]['NROWS']),
-                xllCorner: usesCorner
-                    ? headerItems[2]['XLLCORNER']
-                    : headerItems[2]['XLLCENTER'] - cellSize,
-                yllCorner: usesCorner
-                    ? headerItems[3]['YLLCORNER']
-                    : headerItems[3]['YLLCENTER'] - cellSize,
+                xllCorner: usesCorner ?
+                    headerItems[2]['XLLCORNER'] :
+                    headerItems[2]['XLLCENTER'] - cellSize / 2,
+                yllCorner: usesCorner ?
+                    headerItems[3]['YLLCORNER'] :
+                    headerItems[3]['YLLCENTER'] - cellSize / 2,
                 cellXSize: cellSize,
                 cellYSize: cellSize,
                 noDataValue: headerItems[5]['NODATA_VALUE']
@@ -107,14 +118,14 @@ export default class ScalarField extends Field {
         }
 
         let scalarFields = [];
-        scalarFields = bandIndexes.map(function(bandIndex) {
+        scalarFields = bandIndexes.map(function (bandIndex) {
             let zs = rasters[bandIndex]; // left-right and top-down order
 
             if (fileDirectory.GDAL_NODATA) {
                 let noData = parseFloat(fileDirectory.GDAL_NODATA);
                 // console.log(noData);
                 let simpleZS = Array.from(zs); // to simple array, so null is allowed | TODO efficiency??
-                zs = simpleZS.map(function(z) {
+                zs = simpleZS.map(function (z) {
                     return z === noData ? null : z;
                 });
             }
@@ -133,15 +144,6 @@ export default class ScalarField extends Field {
 
         //console.timeEnd('ScalarField from GeoTIFF');
         return scalarFields;
-    }
-
-    constructor(params) {
-        super(params);
-        this.zs = params['zs'];
-
-        this.grid = this._buildGrid();
-        this._updateRange();
-        //console.log(`ScalarField created (${this.nCols} x ${this.nRows})`);
     }
 
     /**

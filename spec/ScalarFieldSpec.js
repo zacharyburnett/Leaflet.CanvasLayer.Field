@@ -1,24 +1,24 @@
-describe('ScalarField', function() {
+describe('ScalarField', function () {
     let ScalarField = L.ScalarField;
     let Cell = L.Cell;
 
     let dataFolder = 'base/docs/data';
 
-    describe('ASCII Grid format', function() {
+    describe('ASCII Grid format', function () {
         let sf;
 
-        beforeEach(function(fileLoaded) {
-            d3.text(`${dataFolder}/U.asc`, function(z) {
+        beforeEach(function (fileLoaded) {
+            d3.text(`${dataFolder}/U.asc`, function (z) {
                 sf = ScalarField.fromASCIIGrid(z);
                 fileLoaded();
             });
         });
 
-        it('can be created from an ASCIIGrid file', function() {
+        it('can be created from an ASCIIGrid file', function () {
             expect(sf).not.toBe(null);
         });
 
-        it('understand header with XLLCORNER - YLLCORNER corner', function() {
+        it('understand header with XLLCORNER - YLLCORNER corner', function () {
             var fileHeaderLines = [
                 'ncols        10',
                 'nrows        10',
@@ -39,7 +39,7 @@ describe('ScalarField', function() {
             });
         });
 
-        it('understand header with XLLCENTER - YLLCENTER corner', function() {
+        it('understand header with XLLCENTER - YLLCENTER corner', function () {
             var fileHeaderLines = [
                 'ncols        10',
                 'nrows        10',
@@ -60,7 +60,7 @@ describe('ScalarField', function() {
             });
         });
 
-        it('can return the value for (i, j) indexes', function() {
+        it('can return the value for (i, j) indexes', function () {
             // top-left
             expect(sf._valueAtIndexes(0, 0)).toEqual(0.011275325901806355);
 
@@ -68,7 +68,7 @@ describe('ScalarField', function() {
             expect(sf._valueAtIndexes(9, 9)).toEqual(0.14851005375385284);
         });
 
-        it('can return the value for a (lon, lat)', function() {
+        it('can return the value for a (lon, lat)', function () {
             /* Testing 2 points for each corner
                 a) near the center of the cell
                 b) near the edges
@@ -101,7 +101,7 @@ describe('ScalarField', function() {
             expect(pNearLR).toBeCloseTo(lrValue, 4);
         });
 
-        it('can return its cells', function() {
+        it('can return its cells', function () {
             let grid = sf.getCells();
             let p0 = grid[0];
             let pN = grid[grid.length - 1];
@@ -110,20 +110,20 @@ describe('ScalarField', function() {
             expect(pN).not.toBe(null);
         });
 
-        it('can calculate the Range of its values', function() {
+        it('can calculate the Range of its values', function () {
             expect(sf.range).not.toBe(null);
             expect(sf.range[0]).toBeCloseTo(0.0058675920590758, 8);
             expect(sf.range[1]).toBeCloseTo(0.21501889824867, 8);
         });
 
-        it('can be filtered', function() {
+        it('can be filtered', function () {
             const min = 0.1;
             const max = 0.15;
 
             expect(sf.range[0] >= min).toBeFalsy();
             expect(sf.range[1] <= max).toBeFalsy();
 
-            sf.setFilter(function(v) {
+            sf.setFilter(function (v) {
                 return v >= min && v <= max;
             });
 
@@ -132,32 +132,32 @@ describe('ScalarField', function() {
         });
     });
 
-    describe('Geotiff: single raster', function() {
+    describe('Geotiff: single raster', function () {
         let sf;
 
-        beforeEach(function(fileLoaded) {
+        beforeEach(function (fileLoaded) {
             d3
                 .request(`${dataFolder}/tz850.tiff`)
                 .responseType('arraybuffer')
-                .get(function(error, tiffData) {
+                .get(function (error, tiffData) {
                     sf = ScalarField.fromGeoTIFF(tiffData.response, 0);
                     fileLoaded();
                 });
         });
 
-        it('can be created from one band', function() {
+        it('can be created from one band', function () {
             expect(sf).not.toBe(null);
         });
     });
 
-    describe('Geotiff: multiple raster, one from each band', function() {
+    describe('Geotiff: multiple raster, one from each band', function () {
         let multipleSf;
 
-        beforeEach(function(fileLoaded) {
+        beforeEach(function (fileLoaded) {
             d3
                 .request(`${dataFolder}/tz850.tiff`)
                 .responseType('arraybuffer')
-                .get(function(error, tiffData) {
+                .get(function (error, tiffData) {
                     multipleSf = ScalarField.multipleFromGeoTIFF(
                         tiffData.response,
                         [0, 1]
@@ -166,7 +166,7 @@ describe('ScalarField', function() {
                 });
         });
 
-        it('array can be created from several bands in file', function() {
+        it('array can be created from several bands in file', function () {
             expect(multipleSf.length).toBe(2);
         });
     });
